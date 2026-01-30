@@ -1,0 +1,107 @@
+{"padTitle":"Strudel-pad",
+"positions":{"map":{"__map":true,
+"values":[["1",{"height":311.7222532685467,
+"id":"1",
+"width":461.0236480142657,
+"x":-196.32537387098196,
+"y":86.26153987751567}],["2",{"height":443.5599060058594,
+"id":"2",
+"type":"move",
+"width":506.9765625,
+"x":305.2291259765625,
+"y":86.15882873535156}],["3",{"height":816.2053927824647,
+"id":"3",
+"type":"move",
+"width":823.135735830349,
+"x":864.3352559917377,
+"y":82.10180014446104}]]}},
+"titles":{"map":{"__map":true,
+"values":[["1",{"id":"1",
+"state":false,
+"title":"Croquet"}],["2",{"id":"2",
+"state":false,
+"title":"Init"}],["3",{"id":"3",
+"state":false,
+"title":"Editor"}]]}},
+"version":3,
+"windowEnabled":{"map":{"__map":true,
+"values":[["1",{"enabled":true,
+"id":"1"}],["2",{"enabled":true,
+"id":"2"}],["3",{"enabled":true,
+"id":"3"}]]}},
+"windowTypes":{"map":{"__map":true,
+"values":[["1","code"],["2","code"],["3","code"]]}},
+"windows":["1","2","3"],
+"zIndex":{"map":{"__map":true,
+"values":[["1",102],["2",101],["3",100]]}}}
+{__codeMap: true, value: [[`1`, `(
+  {parameters: {
+   "appParameters": {
+    "box": "http://localhost:8888",
+    "apiKey": "none",
+    "appId": "org.musical.pad",
+    "name": "abc",
+    "debug": ["reflector"],
+    "password": "abc",
+    "tps": 2,
+    "eventRateLimit": 60
+  },
+  "realm": {"model": [ "change", "doRepl"]},
+  "name": "Strudel"
+},
+   methods: {}
+  }
+)`],
+[`2`, `const {html, render} = import("./preact.standalone.module.js");
+
+const renkon = (() => {
+  const div = document.createElement("div");
+  div.id = "renkon";
+  div.innerHTML =\`
+   <button id="strudelButton">REPL</button>
+    <div class="container">
+        <div id="editor"></div>
+        <div id="output"></div>
+    </div>
+      <canvas id="roll"></canvas>
+\`.trim();
+  document.body.querySelector("#renkon")?.remove();
+  document.body.appendChild(div);
+  return div;
+})();`],
+[`3`, `const {StrudelMirror} = import("./strudel/renkon-strudel.js").then(res=>{
+  window.StrudelLib = res.StrudelLib;
+  return import("./strudel/StrudelMirror/codemirror.js")
+}).then(res=>{
+  return res;
+});
+
+const canvas = renkon.querySelector("#roll");
+const drawContext = canvas.getContext('2d');
+const drawTime = [-2, 2];
+const initCanvas = (() => {
+  canvas.width = canvas.width * 2;
+  canvas.height = canvas.height * 2;
+})();
+
+const editor = doRepl.id ? new StrudelMirror({
+  root: renkon.querySelector("#editor"),
+  initialCode: '',
+  editor: doRepl,
+  prebake: async () => {},
+  renkon: Renkon
+}) : {};
+
+editor.editor ? renkon.querySelector("#editor").appendChild(editor.editor.dom) : {};
+
+const addRepl = Events.listener(renkon.querySelector("#strudelButton"), "click", () => "repl");
+
+const change = Events.or(addRepl);
+const doRepl = Behaviors.collect(0, change, (prev, change) => {
+if (change == "repl") {
+  const model = window.CodeMirrorModel.create({doc: \`Hello\`});
+  console.log(model);
+  return model
+}});
+
+`]]}
